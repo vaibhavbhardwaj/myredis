@@ -3,8 +3,22 @@ import socket  # noqa: F401
 from _thread import *
 import threading
 from threading import Thread
+import time
+from datetime import timedelta
+import sys
+
 
 print_lock = threading.Lock()
+db_dict = {}
+CONFIG_DICT = {}
+# print(CONFIG_DICT)
+
+# print(sys.argv)
+def set_config(data):
+    CONFIG_DICT['config'] = {data[1].replace('--',''):data[2],data[3].replace('--',''):data[4]}
+def get_config():
+    print (CONFIG_DICT)
+    return CONFIG_DICT
 def threaded(c):
     while True:
         data = c.recv(1024)
@@ -17,9 +31,10 @@ def threaded(c):
         
         request_string = decode_string(data.decode("utf-8"))
         print(request_string,"request_string")
-        response_string = respone_data(request_string)
-        print('response',response_string)
-        c.send(response_string.encode('ascii'))
+        command_output = redis_command(request_string)
+        #response_string = respone_data(request_string)
+        print('response',command_output)
+        c.send(command_output.encode('ascii'))
         #c.send(data)    
     c.close()
         # data received from client
@@ -48,7 +63,57 @@ def respone_data(data):
     #print(command_data)
     #print(f'${len(command_data)}\\r\\n{command_data}\\r\\n')
     return f'${len(command_data)}\r\n{command_data}\r\n'
-    	
+
+def redis_command(data):
+    command = data[0]
+    match command:
+        case 'PING':
+            return '+PONG\r\n'
+        case 'ECHO':
+            if len(data) == 2:
+                return f'${len(data[1])}\r\n{data[1]}\r\n'
+            else:
+                return "unknown command"
+        case 'SET':        
+            if len(data) == 3:
+                data_key = data[1]
+                data_value = data[2]
+                db_dict[data_key] = {'value':data_value,'createtime':time.time()}
+                print(db_dict)
+                return '+OK\r\n'
+            elif len(data) == 5:
+                data_key = data[1]
+                data_value = data[2]
+                data_expiry = data[4]
+                db_dict[data_key] = {'value':data_value,'createtime':time.time(),'px':int(data_expiry)}
+                print(db_dict)
+                return '+OK\r\n'
+
+            else:
+                return "unknow command set"
+        case 'GET':
+            if len(data) == 2:
+                data_key = data[1]
+                data_value = db_dict[data_key]['value']
+                data_createtime = db_dict[data_key].get('createtime')
+                print("expiry value",db_dict[data_key].get('px'))
+                if (db_dict[data_key].get('px')):
+                    if (timedelta(seconds = time.time()-data_createtime ).total_seconds()*1000 > db_dict[data_key].get('px')):
+                        return '$-1\r\n'
+                print (f'${len (data_value)} \r\n{data_value}\r\n') 
+                return f'${len (data_value)}\r\n{data_value}\r\n'
+            else:
+                return "unknow command set"
+        case 'CONFIG':
+            config_command = data[1]
+            config_parameter = data[2]
+            config_data = CONFIG_DICT['config'].get(config_parameter)
+            print (f'*2\r\n${len (config_parameter)}\r\n{config_parameter}\r\n${len (config_data)}\r\n{config_data}\r\n')
+            return f'*2\r\n${len (config_parameter)}\r\n{config_parameter}\r\n${len (config_data)}\r\n{config_data}\r\n'
+
+
+
+
 def decode_string(data):
     mark = data[0]
     match mark:
@@ -103,7 +168,9 @@ def encode(data, simple_str=False):
 def main():
     # You can use print statements as follows for debugging, they'll be visible when running tests.
     print("Logs from your program will appear here1!")
-
+    if len(sys.argv) >= 5:
+        set_config(sys.argv)
+    get_config()
    # Uncomment this to pass the first stage
     #
     #server_socket = socket.create_server(("localhost", 6379), reuse_port=True)
