@@ -6,10 +6,7 @@ from threading import Thread
 import time
 from datetime import timedelta
 import sys
-<<<<<<< HEAD
 import os
-=======
->>>>>>> 35678d6a51edd6aef839f86cfdf2caffd037a801
 
 
 print_lock = threading.Lock()
@@ -159,7 +156,6 @@ def redis_command(data):
                 return "unknow command set"
         case 'GET':
             if len(data) == 2:
-<<<<<<< HEAD
                 print(data,db_dict,"duc datta")
                 data_key = data[1]
                 if data_key in db_dict:
@@ -181,19 +177,6 @@ def redis_command(data):
                     key_value = keys_value[keys_string.index(data_key)]
                     print(key_value,"keys")
                     return f'${len(key_value)}\r\n{key_value}\r\n'
-=======
-                data_key = data[1]
-                data_value = db_dict[data_key]['value']
-                data_createtime = db_dict[data_key].get('createtime')
-                print("expiry value",db_dict[data_key].get('px'))
-                if (db_dict[data_key].get('px')):
-                    if (timedelta(seconds = time.time()-data_createtime ).total_seconds()*1000 > db_dict[data_key].get('px')):
-                        return '$-1\r\n'
-                print (f'${len (data_value)} \r\n{data_value}\r\n') 
-                return f'${len (data_value)}\r\n{data_value}\r\n'
-            else:
-                return "unknow command set"
->>>>>>> 35678d6a51edd6aef839f86cfdf2caffd037a801
         case 'CONFIG':
             config_command = data[1]
             config_parameter = data[2]
