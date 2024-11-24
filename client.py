@@ -18,12 +18,20 @@ def Main():
 	#m1 = "*2\r\n$4\r\nECHO\r\n$3\r\norange\r\n"
 	#m1 = "*3\r\n$3\r\nSET\r\n$3\r\nfoo\r\n$3\r\nbar\r\n$2\r\npx\r\n:\r\n10000000\r\n"
 	#m1 = "*2\r\n$3\r\nSET\r\n$3\r\nfoo1\r\n$3\r\nbar\r\n"
+<<<<<<< HEAD
 	m1 = "*2\r\n$3\r\nGET\r\n$3\r\nfoo2\r\n"
 	#m1 = '*1\r\n$4\r\nPING\r\n'
 	#m1 = "*3\r\n$6\r\nCONFIG\r\n$3\r\nGET\r\n$3\r\ndir\r\n"
 	#m1 = "*2\r\n$4\r\nKEYS\r\n$1\r\n*\r\n"
 	
 	message = "shaurya says geeksforgeeks"
+=======
+	#m1 = "*2\r\n$3\r\nGET\r\n$3\r\nfoo\r\n"
+	#m1 = '*1\r\n$4\r\nPING\r\n'
+	m1 = "*3\r\n$6\r\nCONFIG\r\n$3\r\nGET\r\n$3\r\ndir\r\n"
+	
+	message = "shaurya says"
+>>>>>>> 35678d6a51edd6aef839f86cfdf2caffd037a801
     
 	while True:
 		
